@@ -19,9 +19,9 @@ const VideoSchema = new mongoose.Schema({
         type:String,
     },
 
-    tags:[{
-        type:String,
-    }],
+    tags: {
+        type: [String],
+    },
 
     owner:{
         type:mongoose.Schema.Types.ObjectId,
@@ -35,9 +35,10 @@ const VideoSchema = new mongoose.Schema({
         required:true,
     },
 
-    category:{
-        type:[String],
-        required:true,
+    category: {
+        type: [String],
+        required: true,
+        enum: ['Education', 'Entertainment', 'Technology', 'Lifestyle'], 
     },
 
     views:{
@@ -47,7 +48,7 @@ const VideoSchema = new mongoose.Schema({
 
     viewers: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User', // To track which users have viewed the video
+        ref: 'User', 
     }],
 },{timestamps:true});
 

@@ -88,21 +88,19 @@ const logout = (req, res) => {
 
 const updateAvatar = async (req, res) => {
     try {
+        // Ensure a file is uploaded
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
+        // Find the user by ID
         const user = await User.findById(req.user._id);
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
 
-        // Upload the avatar to Cloudinary
-        const result = await cloudinary.v2.uploader.upload(req.file.path, {
-            folder: "avatars",
-            width: 150,
-            height: 150,
-            crop: "fill",
-        });
-
-        // Update the user's avatar field
-        user.avatar = result.secure_url;
+        // Use the secure_url provided by multer
+        user.avatar = req.file.path;
         await user.save();
 
         res.status(200).json({ message: "Avatar updated successfully", avatar: user.avatar });
@@ -110,6 +108,7 @@ const updateAvatar = async (req, res) => {
         res.status(500).json({ message: "Failed to update avatar", error: error.message });
     }
 };
+
 
 const userProfile = async (req, res) => {
     try {
