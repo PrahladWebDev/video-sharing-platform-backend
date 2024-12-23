@@ -89,3 +89,8 @@ const updateVideo = async (req, res) => {
 };
 
 export { uploadVideo, getAllVideos, getVideoById, deleteVideo, updateVideo };
+
+
+
+
+

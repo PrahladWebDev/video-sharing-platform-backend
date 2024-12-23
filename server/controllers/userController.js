@@ -1,6 +1,20 @@
 import User from "../models/User.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import cloudinary from 'cloudinary';
+import dotenv from 'dotenv';
+
+// Load environment variables
+dotenv.config();
+
+// Configure Cloudinary with your credentials from .env
+cloudinary.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+
 
 const generateToken = (id) => {
     return jwt.sign({ id }, process.env.JWT_SEC, { expiresIn: '1h' });
@@ -68,6 +82,32 @@ const logout = (req, res) => {
         res.status(200).json({ message: "Logged out successfully" });
     } catch (error) {
         res.status(500).json({ message: "Logout failed", error: error.message });
+    }
+};
+
+
+const updateAvatar = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        // Upload the avatar to Cloudinary
+        const result = await cloudinary.v2.uploader.upload(req.file.path, {
+            folder: "avatars",
+            width: 150,
+            height: 150,
+            crop: "fill",
+        });
+
+        // Update the user's avatar field
+        user.avatar = result.secure_url;
+        await user.save();
+
+        res.status(200).json({ message: "Avatar updated successfully", avatar: user.avatar });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to update avatar", error: error.message });
     }
 };
 
@@ -160,6 +200,7 @@ export {
     register,
     login,
     logout,
+    updateAvatar,
     userProfile,
     getAllUsers,
     updateCurrentUser,
